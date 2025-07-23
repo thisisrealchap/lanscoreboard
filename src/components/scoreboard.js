@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../styles/Scoreboard.css';
+import Clock from './Clock';
+import ChallengeCard from './ChallengeCard';
+
+
 
 export default function Scoreboard() {
   const [players, setPlayers] = useState([]);
@@ -11,6 +15,36 @@ export default function Scoreboard() {
   const [webcamAvailable, setWebcamAvailable] = useState(null); // initial null comme dans WebcamTest
   const [previewImage, setPreviewImage] = useState(null);
   const [addingPlayer, setAddingPlayer] = useState(false);
+
+const [challenges, setChallenges] = useState([]);
+
+const fetchChallenges = async () => {
+  const snapshot = await getDocs(collection(db, 'challenges'));
+  const challengesData = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  setChallenges(challengesData);
+};
+
+
+// Ensuite dans un useEffect tu récupères les défis depuis Firebase
+useEffect(() => {
+  const fetchChallenges = async () => {
+    const querySnapshot = await getDocs(collection(db, "challenges"));
+    const loadedChallenges = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setChallenges(loadedChallenges);
+  };
+  fetchChallenges();
+}, []);
+
+const [showChallengeModal, setShowChallengeModal] = useState(false);
+const [newChallenge, setNewChallenge] = useState({
+  name: '',
+  prize: '',
+  smiley: '🎲',
+});
+
 
   // Récupération des joueurs en temps réel
   useEffect(() => {
@@ -146,9 +180,27 @@ useEffect(() => {
   // Tri et badges
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
   const lowestScore = sortedPlayers.length ? Math.min(...sortedPlayers.map(p => p.score)) : null;
+console.log("Challenges : ", challenges);
+
+async function addChallenge() {
+  try {
+    await addDoc(collection(db, 'challenges'), {
+      ...newChallenge,
+      winner: null,
+    });
+
+    setNewChallenge({ name: '', prize: '', smiley: '🎲' });
+    setShowChallengeModal(false);
+    fetchChallenges(); // Recharge les défis depuis Firestore
+  } catch (error) {
+    console.error("Erreur lors de l'ajout du défi :", error);
+  }
+}
+
 
   return (
     <div className="scoreboard darkmode">
+	<Clock />
       <h1>LAN Party Scoreboard 🚀</h1>
 
       <div className="add-player-section">
@@ -230,7 +282,7 @@ useEffect(() => {
       </div>
 
       {/* Liste joueurs cartes */}
-      <div className="players-grid">
+      <div className="scoreboard-container">
         {sortedPlayers.map((player, index) => {
           let badge = '';
           if (index === 0) badge = '🥇';
@@ -271,9 +323,65 @@ useEffect(() => {
           );
         })}
       </div>
+<div className="challenges-section">
+  <h2>Mini-Défis 🎯</h2>
+ <button onClick={() => setShowChallengeModal(true)} className="btn bg-blue-500 text-white px-3 py-1 rounded">
+    + Ajouter un défi
+  </button>
+  <div className="challenge-list">
+  {challenges.map((challenge) => (
+    <ChallengeCard
+      key={challenge.id}
+      challenge={challenge}
+      players={players}
+    />
+  ))}
+</div>
+{showChallengeModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded shadow-lg w-80 space-y-4">
+      <h3 className="text-lg font-semibold">Nouveau Mini-Défi</h3>
+      
+      <input
+        className="w-full border p-2 rounded"
+        type="text"
+        placeholder="Nom du défi"
+        value={newChallenge.name}
+        onChange={(e) => setNewChallenge({ ...newChallenge, name: e.target.value })}
+      />
+
+      <input
+        className="w-full border p-2 rounded"
+        type="text"
+        placeholder="Récompense / Malus"
+        value={newChallenge.prize}
+        onChange={(e) => setNewChallenge({ ...newChallenge, prize: e.target.value })}
+      />
+
+      <input
+        className="w-full border p-2 rounded"
+        type="text"
+        placeholder="Smiley (🎯, 🔥, 😂...)"
+        value={newChallenge.smiley}
+        onChange={(e) => setNewChallenge({ ...newChallenge, smiley: e.target.value })}
+      />
+
+      <div className="flex justify-end space-x-2">
+        <button onClick={() => setShowChallengeModal(false)} className="btn px-3 py-1 bg-gray-300 rounded">Annuler</button>
+        <button onClick={addChallenge} className="btn px-3 py-1 bg-green-500 text-white rounded">Ajouter</button>
+      </div>
+    </div>
+  </div>
+)}
+
+</div>
 
       {/* Canvas caché pour capture */}
       <canvas ref={canvasRef} style={{ display: 'none' }} />
     </div>
+
+
+
+
   );
 }

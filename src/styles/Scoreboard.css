@@ -8,23 +8,25 @@ body {
 }
 
 .scoreboard-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
-  justify-content: center;
-  padding: 2rem;
+  justify-items: center;
+  padding: 1rem 1rem; /* marges faibles haut/bas et gauche/droite */
+  margin: 0 auto;
+  box-sizing: border-box;
 }
-
 .player-card {
+  width: 100%;
+  max-width: 220px;
   background: #222;
   border: 2px solid #444;
   border-radius: 8px;
   padding: 1rem;
-  width: 300px;
   box-shadow: 0 0 10px #0ff;
   text-align: center;
+  box-sizing: border-box;
 }
-
 .player-card img {
   width: 100px;
   height: 100px;
@@ -74,5 +76,25 @@ button:disabled {
   object-fit: cover; /* pour éviter étirement bizarre */
   display: block;
   border-radius: 8px;
+}
+
+.challenge-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+
+.challenge-card {
+  background: #333;
+  border: 2px solid #0ff;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 0 12px #0ff4;
+  font-size: 0.85rem;
+  text-align: center;
 }
 
