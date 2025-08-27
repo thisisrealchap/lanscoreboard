@@ -1,0 +1,48 @@
+/* Style arcade global */
+body {
+  background-color: #111;
+  color: #0ff; /* Cyan néon */
+  font-family: 'Press Start 2P', cursive;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3 {
+  color: rgb(71, 214, 178);
+  text-shadow: 2px 2px #000;
+}
+
+button {
+  background-color: #0f0;
+  color: #000;
+  border: 2px solid #fff;
+  padding: 8px 12px;
+  margin: 5px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 2px 2px 0 #000;
+}
+
+button:hover {
+  background-color: #ff0;
+  transform: scale(1.1);
+}
+
+input, select {
+  background-color: #000;
+  color: #0ff;
+  border: 2px solid #f0f;
+  padding: 6px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+}
+
+.card {
+  background-color: #222;
+  border: 2px solid #0ff;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 4px 4px #000;
+}
