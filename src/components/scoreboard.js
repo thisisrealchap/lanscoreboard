@@ -1,9 +1,58 @@
+// ...existing code...
+// Animation feu d'artifice simple
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../styles/Scoreboard.css';
 import Clock from './Clock';
 import ChallengeCard from './ChallengeCard';
+// ...existing code...
+// ...existing code...
+import '../styles/Scoreboard.css';
+// ...existing code...
+// ...existing code...
+
+function Firework({ trigger }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    if (!trigger) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = 200, h = 120;
+    canvas.width = w;
+    canvas.height = h;
+    ctx.clearRect(0, 0, w, h);
+    // Génère des particules
+    const particles = Array.from({ length: 24 }, (_, i) => ({
+      x: w / 2,
+      y: h / 2,
+      angle: (i / 24) * 2 * Math.PI,
+      speed: 2 + Math.random() * 2,
+      color: `hsl(${Math.random() * 360},100%,60%)`
+    }));
+    let frame = 0;
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      particles.forEach(p => {
+        const px = p.x + Math.cos(p.angle) * p.speed * frame;
+        const py = p.y + Math.sin(p.angle) * p.speed * frame;
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      });
+      frame++;
+      if (frame < 25) requestAnimationFrame(draw);
+    }
+    draw();
+    // Nettoyage
+    return () => ctx.clearRect(0, 0, w, h);
+  }, [trigger]);
+  return (
+    <canvas ref={canvasRef} style={{ position: 'absolute', pointerEvents: 'none', left: 0, top: 0, width: 200, height: 120, zIndex: 10 }} />
+  );
+}
 
 
 
@@ -140,6 +189,7 @@ useEffect(() => {
   }
 
   // Update score
+  const [fireworkPlayer, setFireworkPlayer] = useState(null);
   async function updateScore(id, delta) {
     const player = players.find(p => p.id === id);
     if (!player) return;
@@ -152,6 +202,10 @@ useEffect(() => {
     }
 
     await updateDoc(docRef, updates);
+    if (delta === 10) {
+      setFireworkPlayer(id);
+      setTimeout(() => setFireworkPlayer(null), 1200);
+    }
   }
 
   // Reset score
@@ -294,7 +348,8 @@ async function addChallenge() {
           if (player.score > 100) badge += ' 💯';
 
           return (
-            <div className="player-card" key={player.id}>
+            <div className="player-card" key={player.id} style={{ position: 'relative' }}>
+              {fireworkPlayer === player.id && <Firework trigger={true} />}
               <div className="player-image">
                 {player.image ? (
                   <img src={player.image} alt={`Avatar ${player.name}`} />
@@ -315,6 +370,7 @@ async function addChallenge() {
                     -1
                   </button>
                   <button className="btn score-btn" onClick={() => updateScore(player.id, +1)} title="Incrémenter">+1</button>
+                  <button className="btn score-btn" onClick={() => updateScore(player.id, +10)} title="+10 points" style={{ backgroundColor: '#ff0', color: '#000', fontWeight: 'bold' }}>+10</button>
                   <button className="btn reset-btn" onClick={() => resetScore(player.id)} title="Réinitialiser">Reset</button>
                   <button className="btn remove-btn" onClick={() => removePlayer(player.id)} title="Supprimer">🗑️</button>
                 </div>
