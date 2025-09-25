@@ -217,7 +217,7 @@ const TournamentPage = () => {
   const [teamCount, setTeamCount] = useState(2);
   const [teams, setTeams] = useState([]); // [{name, players: [id]}]
   // Pour la fonctionnalité "rejouer"
-  const [replayTournament, setReplayTournament] = useState(null);
+
 
   // Récupération des joueurs depuis Firebase
   useEffect(() => {
@@ -665,13 +665,28 @@ const TournamentPage = () => {
 
   // UI
   return (
-    <div style={{
-      fontFamily: "'Press Start 2P', cursive",
-      backgroundColor: '#111',
-      color: '#0ff',
-      minHeight: '100vh',
-      padding: '20px'
-    }}>
+    <div>
+      {/* Bouton Geoguessr affiché une seule fois */}
+      {/* ...existing code... */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+        <a
+          href="/geoguessr"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: '#0ff',
+            color: '#222',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            fontWeight: 'bold',
+            textDecoration: 'none',
+            boxShadow: '0 2px 8px #0002',
+            marginRight: 10
+          }}
+        >
+          🌍 Tournois Geoguessr
+        </a>
+      </div>
       <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>
         🏆 Gestion des Tournois 🏆
       </h1>
@@ -1080,7 +1095,7 @@ const TournamentPage = () => {
                       } else {
                         setSelectedPlayers(tournament.participants || []);
                       }
-                      setReplayTournament(tournament); // Pour usage ultérieur si besoin
+
                       setShowCreateModal(true);
                     }}
                     style={{
